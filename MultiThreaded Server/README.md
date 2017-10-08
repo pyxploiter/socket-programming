@@ -1,4 +1,4 @@
-# Multi-threaded Linux Server
+# Multi-threaded Linux Server (TCP)
 
 The server will accept incoming connections on 3 ports: 8000, 8001, 8002. Each listening socket must have an independent thread.
 
