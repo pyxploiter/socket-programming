@@ -5,14 +5,11 @@
 #include <netinet/in.h>
 #include <errno.h>
 #include <string.h>
-#include <sndfile.h>
 #include <arpa/inet.h>
 #include <unistd.h>
 
 #define PORT 10006
 #define PACKET_SIZE 1024
-
-#define ARRAY_LEN(x)    ((int) (sizeof (x) / sizeof (x [0])))
 
 int initSocket(){
     struct sockaddr_in serverAddr;
@@ -47,66 +44,39 @@ int initSocket(){
 }
 
 int main(){
-
-    SNDFILE *outfile;
-    SF_INFO in_info;
-    int recvPacket[PACKET_SIZE];
-    
-    sf_count_t count;
-
-    memset(&in_info, 0, sizeof(in_info));
-
+    int count = 1;
+    char filename[50];
+    char received[10] = "received_";
+    FILE *audio;
+    char recvPacket[PACKET_SIZE];
     int serverSock = initSocket();
-    int file_info[6]={0};
-
     int clientSock = accept(serverSock,NULL,NULL);
     
-    if(read(clientSock,file_info,sizeof(file_info))==-1){
-        printf("read error.\n");
+    char size[4]; int file_size;
+    read(clientSock, size, sizeof(size));   // receiving file size
+    file_size = *((int*)size);              // typecasting from char[] to int
+    int no_packets = file_size/PACKET_SIZE; 
+    read(clientSock, filename, sizeof(filename));
+    strcat(received,filename);
+    audio = fopen(received,"wb");
+
+    // receiving packets of 1024 bits
+    while(count < (no_packets+1)){
+	if (read(clientSock,recvPacket,sizeof(recvPacket)) == -1){
+		printf("Reading error\n");
+		exit(0);
+	}       
+	// writing data to file 
+	fwrite(recvPacket, sizeof(char),sizeof(recvPacket),audio);
+        memset(&recvPacket, 0, sizeof(recvPacket));
+	count++;
     }
-    in_info.frames = file_info[0] ;
-    in_info.samplerate = file_info[1];
-    in_info.channels = file_info[2];
-    in_info.format = file_info[3];
-    in_info.sections = file_info[4];
-    in_info.seekable = file_info[5];
-    
-    int n_items = in_info.frames*in_info.channels; 
-    int nbytes = n_items/PACKET_SIZE;
-    int counter = 0;
+    // receiving remaining bits
+    read(clientSock, recvPacket, (file_size-(no_packets*PACKET_SIZE)));
+    fwrite(recvPacket, sizeof(char), (file_size-(no_packets*PACKET_SIZE)), audio);
 
-    int *baraBuf = (int *) malloc(n_items*sizeof(int));
-
-    if ((outfile = sf_open("received.wav", SFM_WRITE, &in_info)) == NULL){
-        printf("Error: Failed to open output file.\n");
-        sf_close(outfile);
-        exit(-1);
-    }
-
-    while (counter < n_items){
-        if(read(clientSock,recvPacket,sizeof(recvPacket))==-1){
-            printf("read error.\n");
-            exit(-1);
-        }
-
-        if (counter < (n_items-(n_items%PACKET_SIZE))){
-            for (int i = 0; i < ARRAY_LEN(recvPacket); i++){
-                baraBuf[counter] = recvPacket[i];
-                counter++;
-            }
-        }
-        else{
-            for (int i = 0; i < (n_items%PACKET_SIZE); i++){
-                baraBuf[counter] = recvPacket[i];
-                counter++;
-            }
-
-        }
-    }
-
-    sf_write_int(outfile, baraBuf, n_items);
     printf("Audio File Received.\n");
-
+    fclose(audio);
     close(clientSock);
     close(serverSock);
     return 0;
