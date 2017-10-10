@@ -8,7 +8,7 @@ import datetime
 from socket import *	# import socket module
 
 if (len(sys.argv) < 2):
-	print "Execution help: python client.py <filename>.<ext>"
+	print "Execution help: python client.py <filename>.<extension>"
 	exit(0)
 
 serverIP = '127.0.0.1'	# set IP where server is listening
