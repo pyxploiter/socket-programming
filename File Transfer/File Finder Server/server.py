@@ -9,11 +9,9 @@ serverPort = 12007
 
 def find(name):
 	paths = {}
-	# source: https://www.tutorialspoint.com/python/os_walk.htm
 	for root, dirs, files in os.walk("database"):
 		if name in files:
 			file = os.path.join(root,name)
-			# source: https://stackoverflow.com/questions/2104080/how-to-check-file-size-in-python
 			file_size = os.stat(file).st_size
 			paths.update({file:file_size})
 	return paths
@@ -48,7 +46,6 @@ while 1:
 		connectionSocket.close()
 		break	
 	# serializing the dictionary for transfering
-	# source: https://stackoverflow.com/questions/15190362/sending-a-dictionary-using-sockets-in-python
 	serialized_paths = json.dumps(send_paths)
 	# sending data
 	connectionSocket.send(serialized_paths) 
