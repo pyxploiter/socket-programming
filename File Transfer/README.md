@@ -14,6 +14,6 @@
 * The FFS reads the requested file and then transfers it to FFC through the open socket.
 * The FFC receives the file and saves it with the name file_found.txt in the current directory.
 * Both FFC and FFS maintains their separate log files clog.txt and slog.txt respectively. You should log the following:
-	Time: Event( Send/Recv): Source IP: Destination IP 
+	`Time: Event( Send/Recv): Source IP: Destination IP` 
 * Program works for both Windows and Linux OS. 
 
