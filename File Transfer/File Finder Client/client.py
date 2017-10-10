@@ -1,5 +1,4 @@
 # Python 2.7.12
-# M. Asad Ali : 134437
 
 import sys
 import os
