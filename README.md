@@ -1,4 +1,4 @@
-# Socket Programming in UNIX
+# Socket Programming Programs
 
 1. <a href="https://github.com/xploiter-projects/socket-programming/tree/master/MultiThreaded%20Server">Multi-threaded Linux Server (TCP) in C</a>
 
